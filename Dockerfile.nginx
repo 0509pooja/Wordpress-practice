@@ -1,0 +1,19 @@
+FROM nginx:latest
+
+# Copy Nginx configuration file
+COPY ./nginx.conf /etc/nginx/nginx.conf
+
+# Copy the log rotation script
+COPY ./generate_log_rotation_report.sh /usr/local/bin/generate_log_rotation_report.sh
+
+# Ensure the script is executable
+RUN chmod +x /usr/local/bin/generate_log_rotation_report.sh
+
+# Install cron
+RUN apt-get update && apt-get install -y cron
+
+# Add a cron job
+RUN echo "0 0 * * * /usr/local/bin/generate_log_rotation_report.sh" >> /etc/cron.d/log-rotation
+
+# Apply cron job
+RUN crontab /etc/cron.d/log-rotation
